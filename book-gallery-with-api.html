@@ -180,7 +180,7 @@
 ];
 
         ];
-        
+
         // Aggiungi questa funzione dopo la definizione dell'array 'books'
             function populateBookGrid() {
             const bookGrid = document.getElementById('bookGrid');
@@ -191,7 +191,8 @@
         }
         
         // Chiama questa funzione quando la pagina è caricata
-        window.addEventListener('load', populateBookGrid);
+        // window.addEventListener('load', populateBookGrid);
+        populateBookGrid()
 
         function exportBookList() {
             const exportContent = document.getElementById('exportContent');
