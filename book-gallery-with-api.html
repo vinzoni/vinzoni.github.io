@@ -182,6 +182,8 @@
             });
         }
         
+        populateBookGrid();
+        
         function exportBookList() {
             const exportContent = document.getElementById('exportContent');
             const booksArray = JSON.stringify(books, null, 2);
@@ -211,14 +213,6 @@ document.getElementById('exportModal').querySelector('.close').onclick = functio
             `;
             bookElement.onclick = () => openModal(index);
             return bookElement;
-        }
-
-        function populateBookGrid() {
-            const bookGrid = document.getElementById('bookGrid');
-            bookGrid.innerHTML = ''; // Pulisce la griglia esistente
-            books.forEach((book, index) => {
-                bookGrid.appendChild(createBookElement(book, index));
-            });
         }
 
         async function searchBook(title, author) {
