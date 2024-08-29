@@ -177,9 +177,8 @@
             "description": "Nessuna descrizione disponibile",
             "cover": "http://books.google.com/books/content?id=KOgTAAAAQAAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
         }
-];
+    ];
 
-        ];
 
         // Aggiungi questa funzione dopo la definizione dell'array 'books'
             function populateBookGrid() {
@@ -191,8 +190,7 @@
         }
         
         // Chiama questa funzione quando la pagina è caricata
-        // window.addEventListener('load', populateBookGrid);
-        populateBookGrid()
+        window.addEventListener('load', populateBookGrid);
 
         function exportBookList() {
             const exportContent = document.getElementById('exportContent');
