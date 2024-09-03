@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galleria di Libri da Regalare</title>
+    <title>Libri da regalare</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -62,7 +62,7 @@
             justify-content: center;
             margin-bottom: 20px;
         }
-        #searchForm input {
+        #searchForm input, #searchForm select {
             margin-right: 10px;
             padding: 5px;
         }
@@ -93,7 +93,7 @@
             max-width: 600px;
         }
         #exportButton {
-           display: block;
+            display: none;
             margin: 20px auto;
             padding: 10px 20px;
             background-color: #2c3e50;
@@ -117,19 +117,34 @@
             text-decoration: none;
             cursor: pointer;
         }
+        .language-flag {
+            display: inline-block;
+            width: 20px;
+            height: 15px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .book-language {
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
-    <h1>Galleria di Libri da Regalare</h1>
+    <h1>Libri in regalo</h1>
+    <p id="messageUnderTitle">Se uno di questi libri ti interessa mandami un messaggio (se hai il mio numero di cellulare) oppure scrivimi a andrea.vinzoni@gmail.com e te lo tengo da parte.</p>
     <form id="searchForm">
         <input type="text" id="titleInput" placeholder="Titolo del libro" required>
         <input type="text" id="authorInput" placeholder="Autore del libro" required>
+        <select id="languageInput" required>
+            <option value="">Seleziona lingua</option>
+            <option value="italiano">Italiano</option>
+            <option value="english">English</option>
+        </select>
         <button type="submit">Cerca e Aggiungi Libro</button>
     </form>
     <button id="exportButton">Esporta Lista Libri</button>
-    <div class="book-grid" id="bookGrid">
-         
-    </div>
+    <div class="book-grid" id="bookGrid"></div>
 
     <!-- Modal per i dettagli del libro -->
     <div id="bookModal" class="modal">
@@ -139,6 +154,7 @@
             <p id="modalAuthor"></p>
             <img id="modalCover" src="" alt="Copertina del libro" style="max-width: 200px; margin: 10px 0;">
             <p id="modalDescription"></p>
+            <p id="modalLanguage"></p>
         </div>
     </div>
 
@@ -152,44 +168,277 @@
     </div>
 
     <script>
-        const books = [
-        {
-            "title": "Il processo",
-            "author": "Franz Kafka",
-            "description": "\"Il processo\" appare nel 1925, un anno dopo la morte di Franz Kafka: ed è proprio con questo testo che Max Brod, suo esecutore testamentario, diede inizio alla pubblicazione postuma di scritti dell’amico, trasgredendo così alla volontà dell’autore, che lo aveva incaricato di distruggere, alla sua morte, tutte le sue carte. Kafka si era dedicato a questa narrazione, che, a voce, era solito chiamare \"Il processo\", durante la seconda metà del 1914, nei mesi che seguirono un avvenimento decisivo per la sua vita, la rottura del fidanzamento con Felice Bauer; nel gennaio del 1915 egli, a quanto risulta, abbandonava definitivamente l’opera. La versione del \"Processo\" che qui si presenta, opera di Giorgio Zampa, ha avuto il Premio Montecchio 1976 per la migliore traduzione dalla lingua tedesca apparsa negli anni 1973-1975. L’autore di essa si è proposto di restituire il carattere del testo che è quello di un «romanzo in frammenti», non sottoposto alla scrupolosa elaborazione e revisione che Kafka dedicò ai pochi scritti da lui pubblicati. In questo modo il lettore italiano potrà avvicinare \"Il processo\" come esso è: nella sua disadorna, immediata, terribile verità.",
-            "cover": "http://books.google.com/books/content?id=YNjiCwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
-        },
-        {
-            "title": "Spillover: Animal Infections and the Next Human Pandemic",
-            "author": "David Quammen",
-            "description": "\"[Mr. Quammen] is not just among our best science writers but among our best writers, period.\" —Dwight Garner, New York Times The next big human pandemic—the next disease cataclysm, perhaps on the scale of AIDS or the 1918 influenza—is likely to be caused by a new virus coming to humans from wildlife. Experts call such an event “spillover” and they warn us to brace ourselves. David Quammen has tracked this subject from the jungles of Central Africa, the rooftops of Bangladesh, and the caves of southern China to the laboratories where researchers work in space suits to study lethal viruses. He illuminates the dynamics of Ebola, SARS, bird flu, Lyme disease, and other emerging threats and tells the story of AIDS and its origins as it has never before been told. Spillover reads like a mystery tale, full of mayhem and clues and questions. When the Next Big One arrives, what will it look like? From which innocent host animal will it emerge? Will we be ready?",
-            "cover": "http://books.google.com/books/content?id=RMmxxYUBQhgC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
-        },
-        {
-            "title": "Favole al telefono",
-            "author": "Gianni Rodari",
-            "description": "Nessuna descrizione disponibile",
-            "cover": "http://books.google.com/books/content?id=IkB7CAcZUukC&printsec=frontcover&img=1&zoom=1&source=gbs_api"
-        },
-        {
-            "title": "IL Principe",
-            "author": "Niccolò Machiavelli",
-            "description": "Nessuna descrizione disponibile",
-            "cover": "http://books.google.com/books/content?id=KOgTAAAAQAAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
-        }
-    ];
+ const books = [
+  {
+    "title": "L.A. Confidential",
+    "author": "James Ellroy",
+    "description": "L.A. Confidential is epic \"noir\", a crime novel of astonishing detail and scope written by the bestselling author of The Black Dahlia. A horrific mass murder invades the lives of victims and victimizers on both sides of the law. And three lawmen are caught in a deadly spiral, a nightmare that tests loyalty and courage, and offers no mercy, grants no survivors. (124,000 words)",
+    "cover": "http://books.google.com/books/content?id=3S02AQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "The Great Depression: A Diary",
+    "author": "Benjamin Roth",
+    "description": "When the stock market crashed in 1929, Benjamin Roth was a young lawyer in Youngstown, Ohio. After he began to grasp the magnitude of what had happened to American economic life, he decided to set down his impressions in his diary. This collection of those entries reveals another side of the Great Depression—one lived through by ordinary, middle-class Americans, who on a daily basis grappled with a swiftly changing economy coupled with anxiety about the unknown future. Roth's depiction of life in time of widespread foreclosures, a schizophrenic stock market, political unrest and mass unemployment seem to speak directly to readers today.",
+    "cover": "http://books.google.com/books/content?id=op04DgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "english"
+  },
+  {
+    "title": "Il vostro mutuo. Come sceglierlo, estinguerlo prima del tempo e risparmiare denaro",
+    "author": "Andrea Ruver",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=NXOxAAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Matematica. Tutto quello che avreste voluto sapere",
+    "author": "Albrecht Beutelspacher",
+    "description": "Albrecht Beutelspacher è noto ormai anche in Italia per la sua straordinaria capacità di rendere divertente una materia apparentemente ostica e noiosa come la matematica. In tanti anni di attività ha registrato un entusiasmo e un interesse tali da decidere di raccogliere in un libro le domande più frequenti e originali che gli sono state rivolte da grandi e piccini. Frutto di un’accurata selezione dei quesiti ricevuti, il testo è suddiviso per argomenti e offre un’ampia panoramica della materia, lasciando al lettore la scelta del percorso da seguire. E così, sia che decidiate di sbirciare nella storia della matematica, sfatare una volta per tutte alcuni luoghi comuni oppure rispolverare i fondamenti appresi a scuola, sfogliando Matematica.Tutto quello che avreste voluto sapere potete essere certi di trovare una spiegazione concisa e puntuale, che soddisferà la vostra curiosità e la voglia di imparare.",
+    "cover": "http://books.google.com/books/content?id=8u0476UhXngC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Agosto 1914",
+    "author": "Aleksandr Isaevǐc Soľzenicyn",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "/api/placeholder/150/200",
+    "language": "italiano"
+  },
+  {
+    "title": "Nuovi misteri d'Italia",
+    "author": "Carlo Lucarelli",
+    "description": "Beskrivelser af en række uløste italienske kriminalsager",
+    "cover": "http://books.google.com/books/content?id=zI8EAQAAIAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "La paura e la speranza",
+    "author": "Giulio Tremonti",
+    "description": "Con un'analisi sferzante e autorevole, questo libro ci racconta le cause della situazione attuale ma cerca anche di indicare una strada percorribile per superare questo momento, per vincere la paura e tornare alla speranza.",
+    "cover": "http://books.google.com/books/content?id=dBObDA4ko-8C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Le menzogne di Ulisse. L'avventura della logica da Parmenide ad Amartya Sen",
+    "author": "Piergiorgio Odifreddi",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=AmImnQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Il quartiere",
+    "author": "Vasco Pratolini",
+    "description": "C'è Valerio che nel 1932, quando inizia a raccontare, ha quindici anni e porta i calzoni corti. Il cuore gli batte per Luciana, ma è difficile dirlo a lei. Poi ci sono Giorgio, buono e coraggioso, Maria, che per leggerezza rischierà di perderlo, Marisa e Carlo, che molto avrà da farsi perdonare, Olga, bella e docile, Arrigo e infine Gino, con il suo grumo nero nel cuore. Sono giovani e poveri, ma uniti: nati e cresciuti a Santa Croce, Firenze. \"Nulla sapevamo - dice Valerio - non volevamo sapere forse. Ci promettevamo oneste gioie. La nostra vita erano le strade e piazze del Quartiere.\" Ma la realtà, quella città aliena con i suoi bei caffè e le orchestrine, non si accontenterà a lungo di restare fuori a guardare. Farà irruzione nelle loro vite con la prepotenza del regime, delle guerre, della miseria. Distruggerà le loro case, li sparpaglierà nel mondo, li chiamerà chi alle armi, chi in carcere, chi nella lotta politica. Ma non potrà mai derubarli dell'eredità più preziosa del Quartiere, quell'incrollabile fede nell'uomo e nel valore della solidarietà.",
+    "cover": "http://books.google.com/books/content?id=3XQPRtnFnOsC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Qualcosa non va",
+    "author": "Roberto Gervaso",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=sXPFPQAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Il mondo senza di noi",
+    "author": "Alan Weisman",
+    "description": "Guardatevi intorno, nel mondo d'oggi. La vostra casa, la vostra città. Il terreno circostante, con il manto stradale, e il suolo nascosto al di sotto. Lasciate tutto com'è, ma togliete gli esseri umani.",
+    "cover": "http://books.google.com/books/content?id=cDItDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "The Peter Principle",
+    "author": "Dr. Laurence J. Peter, Raymond Hull",
+    "description": "The classic #1 New York Times bestseller that answers the age-old question Why is incompetence so maddeningly rampant and so vexingly triumphant? The Peter Principle, the eponymous law Dr. Laurence J. Peter coined, explains that everyone in a hierarchy—from the office intern to the CEO, from the low-level civil servant to a nation’s president—will inevitably rise to his or her level of incompetence. Dr. Peter explains why incompetence is at the root of everything we endeavor to do—why schools bestow ignorance, why governments condone anarchy, why courts dispense injustice, why prosperity causes unhappiness, and why utopian plans never generate utopias. With the wit of Mark Twain, the psychological acuity of Sigmund Freud, and the theoretical impact of Isaac Newton, Dr. Laurence J. Peter and Raymond Hull’s The Peter Principle brilliantly explains how incompetence and its accompanying symptoms, syndromes, and remedies define the world and the work we do in it.",
+    "cover": "http://books.google.com/books/content?id=q8j3AgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "english"
+  },
+  {
+    "title": "Tutto sulla corsa. I segreti che un runner deve sapere",
+    "author": "Scott Douglas",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=XHHUAQAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Professional Java for Web Applications",
+    "author": "Nicholas S. Williams",
+    "description": "The comprehensive Wrox guide for creating Java web applications for the enterprise This guide shows Java software developers and software engineers how to build complex web applications in an enterprise environment. You'll begin with an introduction to the Java Enterprise Edition and the basic web application, then set up a development application server environment, learn about the tools used in the development process, and explore numerous Java technologies and practices. The book covers industry-standard tools and technologies, specific technologies, and underlying programming concepts. Java is an essential programming language used worldwide for both Android app development and enterprise-level corporate solutions As a step-by-step guide or a general reference, this book provides an all-in-one Java development solution Explains Java Enterprise Edition 7 and the basic web application, how to set up a development application server environment, which tools are needed during the development process, and how to apply various Java technologies Covers new language features in Java 8, such as Lambda Expressions, and the new Java 8 Date & Time API introduced as part of JSR 310, replacing the legacy Date and Calendar APIs Demonstrates the new, fully-duplex WebSocket web connection technology and its support in Java EE 7, allowing the reader to create rich, truly interactive web applications that can push updated data to the client automatically Instructs the reader in the configuration and use of Log4j 2.0, Spring Framework 4 (including Spring Web MVC), Hibernate Validator, RabbitMQ, Hibernate ORM, Spring Data, Hibernate Search, and Spring Security Covers application logging, JSR 340 Servlet API 3.1, JSR 245 JavaServer Pages (JSP) 2.3 (including custom tag libraries), JSR 341 Expression Language 3.0, JSR 356 WebSocket API 1.0, JSR 303/349 Bean Validation 1.1, JSR 317/338 Java Persistence API (JPA) 2.1, full-text searching with JPA, RESTful and SOAP web services, Advanced Message Queuing Protocol (AMQP), and OAuth Professional Java for Web Applications is the complete Wrox guide for software developers who are familiar with Java and who are ready to build high-level enterprise Java web applications.",
+    "cover": "http://books.google.com/books/content?id=cHr0AgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "english"
+  },
+  {
+    "title": "Misteri d'Italia",
+    "author": "Carlo Lucarelli",
+    "description": "Un libro-indagine sui più inquietanti misteri della nostra storia recente: dal caso Sindona a Calvi o Mattei, da Mauro De Mauro alla Banda della Uno Bianca, dal caso Castellari alla strage di Gioia Tauro, Carlo Lucarelli ripercorre come in un romanzo noir eventi che hanno tenuto l'Italia con il fiato sospeso. Assieme al testo, stesura arricchita rispetto alla sceneggiatura originale della trasmissione \"Blu notte - Misteri italiani\", sono intergrati nella narrazione documenti e interviste.",
+    "cover": "http://books.google.com/books/content?id=SbWiNAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Promemoria",
+    "author": "Marco Travaglio",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=hxuTPQAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Onorevole, stia zitto",
+    "author": "Giulio Andreotti",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=GzEvAAAAYAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Pappagalli verdi",
+    "author": "Gino Strada",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=zm_QLrqbCEwC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Leggere",
+    "author": "Corrado Augias",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=45kFB_hIhP4C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Codice Libero (Free as in Freedom)",
+    "author": "Sam Williams",
+    "description": "La storia di un genio eccentrico del software, a partire dalle sue esperienze scolastiche e universitarie, fino alle battaglie combattute contro le grandi corporation. Idealista e rivoluzionario, Stallman ha dato il via al movimento free software che sta scuotendo le fondamenta di tutto il mercato informatico, rappresentando un inevitabile punto di confronto per colossi come Microsoft. Secondo Stallman, il prodotto dell'ingegno deve restare libero: il codice sorgente di qualunque programma rappresenta un bene comune e, proteggerlo con brevetti e copyright, andrebbe considerato un crimine contro l'umanità. Un saggio illuminante che, dipingendo il ritratto di una delle figure più importanti nella storia dell'informatica, mostra i retroscena di una battaglia occulta tra il movimento per il software libero e i grandi interessi commerciali. Per tutti coloro che vogliono capire come funziona il mercato del software nel mondo, come si è arrivati alla situazione attuale e quali sono le possibilità che ci riserva il futuro.",
+    "cover": "http://books.google.com/books/content?id=1lloCtR6pgsC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Sei abbastanza sveglio per lavorare in Google?",
+    "author": "William Poundstone",
+    "description": "\"Quante palle da golf stanno in uno scuolabus? \", \"Misurate esattamente 9 minuti usando soltanto una clessidra da 4 minuti e una da 7 minuti\", \"Sei ridotto alle dimensioni di una monetina e ti buttano in un frullatore. La tua massa è anch'essa ridotta in modo che la tua densità rimanga invariata. Le lame cominceranno a girare tra sessanta secondi. Cosa fai?\" Questi sono soltanto alcuni dei test apparentemente impossibili che vengono trattati in Sei abbastanza sveglio per lavorare in Google? In questa guida del ventunesimo secolo al lavoro dei vostri sogni, William Poundstone svela la storia, i segreti e le tortuose tecniche di selezione delle più importanti aziende - in particolare delle compagnie tecnologiche - del giorno d'oggi, svelandovi come affrontare e risolvere decine dei più difficili quesiti utilizzati nei colloqui di lavoro. Scoprirete l'importanza del pensiero creativo (e le ragioni per cui le compagnie lo apprezzano più di ogni altra qualità o referenza), acquisirete gli strumenti per avere la meglio nella competizione (tenendo presente che talvolta potrebbe non esserci una risposta giusta, ma che c'è sempre una risposta migliore), comprenderete quanto conti la vostra pagina Facebook (e come volgere a vostro favore i social network) e molto altro ancora. Questo libro è una guida affascinante, divertente e indispensabile alla soluzione del problema di come avere successo nell'odierno mercato del lavoro.",
+    "cover": "http://books.google.com/books/content?id=YV4nAgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Comprare casa",
+    "author": "Renato Gentilini",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=UYxOAAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Zero. Storia di una cifra",
+    "author": "Robert Kaplan",
+    "description": "Senza lo zero, la matematica come la conosciamo non esisterebbe. Ma qual è l'origine di questo simbolo che rappresenta il nulla? Quando fu usato la prima volta? E quali conseguenze ha portato nel nostro modo di contare e pensare? Robert Kaplan, in un viaggio sorprendente nell'evoluzione della matematica, ci racconta tutto della sua storia. Ignoto ai greci e ai romani, lo zero giunse in Occidente nel Medioevo attraverso gli arabi, che a loro volta ne avevano appreso la nozione dagli indiani. Poi, con i grandi rivoluzionari della matematica moderna, assunse nuovi significati, fino a conquistare un ruolo centrale nella nostra stessa visione dell'universo. Al punto che, come ci ricorda Kaplan, \"guardate attraverso lo zero e vedrete il mondo. Esso consente di mettere a fuoco il maestoso, organico sviluppo della matematica, e questa, a sua volta, la natura complessa della realtà\".",
+    "cover": "http://books.google.com/books/content?id=59KcTP7-9NgC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Il condominio",
+    "author": "James Graham Ballard",
+    "description": "Un elegante condominio in una zona residenziale, costruito secondo le più avanzate tecnologie, è in grado di garantire l'isolamento ai suoi residenti ma si dimostrerà incapace di difenderli. Il grattacielo londinese di vetro e cemento, alto quaranta piani e dotato di mille appartamenti, è il teatro della generale ricaduta nella barbarie di un'intera classe sociale emergente. Viene a mancare l'elettricità ed è la fine della civiltà, la metamorfosi da paradiso a inferno, la nascita di clan rivali, il via libera a massacri e violenza. Il condominio, con i piani inferiori destinati alle classi inferiori, e dove via via che si sale in altezza si sale di gerarchia sociale, si trasforma in una prigione per i condomini che, costretti a lottare per sopravvivere, danno libero sfogo a un'incontenibile e primordiale ferocia. \"Era trascorso qualche tempo e, seduto sul balcone a mangiare il cane, il dottor Robert Laing rifletteva sui singolari avvenimenti verificatisi in quell'immenso condominio, nei tre mesi precedenti. Ora che tutto era tornato alla normalità, si rendeva conto con sorpresa che non c'era stato un inizio evidente, un momento al di là del quale le loro vite erano entrate in una dimensione chiaramente più sinistra. Con i suoi quaranta piani e le migliaia di appartamenti, il supermarket e le piscine, la banca e la scuola materna – ora in stato di abbandono, per la verità – il grattacielo poteva offrire occasioni di scontro e violenza in abbondanza.\"",
+    "cover": "http://books.google.com/books/content?id=CLKOCgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Small is Beautiful",
+    "author": "Ernst Friedrich Schumacher",
+    "description": "A controversial study, first published in 1973, of the economic structure of the western world. Schumacher maintains that man's current pursuit of profit and progress has resulted in gross economic inefficiency, environmental pollution and inhumane working conditions.",
+    "cover": "http://books.google.com/books/content?id=tKMY5WlwISEC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "english"
+  },
+  {
+    "title": "Comma 22. Catch 22",
+    "author": "Joseph Heller",
+    "description": "L’espressione “Comma 22”, è diventata, grazie a questo libro, emblema dell’assurdità e della demenza militare. Protagonista è l’antieroico bombardiere americano Yossarian, ossessionato dall’idea che migliaia di persone sconosciute, alle quali lui personalmente non ha fatto nulla, tentino continuamente di porre fine ai suoi giorni. La storia è popolata di personaggi stravaganti e irreparabilmente maniaci, che nella zelante applicazione della disciplina marziale mettono in ridicolo la ferrea e folle logica del Comma 22. Pubblicato per la prima volta nel 1963, questo romanzo è stato universalmente riconosciuto come il capolavoro della letteratura antimilitarista di tutti i tempi, per la rappresentazione grottesca della retorica militare della morte. Molti dei pacifisti che manifestavano davanti alla Casa Bianca ai tempi del Vietnam portavano appunto una spilla con lo slogan “Yossarian vive”. Da questo romanzo la serie Sky Original CATCH-22 diretta, prodotta e interpretata da George Clooney.",
+    "cover": "http://books.google.com/books/content?id=P8aWDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Mutande di ghisa",
+    "author": "Marco Fratini, Lorenzo Marconi",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=RNg9kgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "L'Algoritmo Definitivo",
+    "author": "Pedro Domingos",
+    "description": "««Non è fantascienza o futurologia. Domingos spiega che siamo già circondati da computer imparanti». » «la Repubblica» - Federico Rampini «Il Sacro Graal dell’informatica è una macchina capace di insegnare a se stessa a partire dall’esperienza, proprio come facciamo noi umani. Il machine learning potrebbe permetterci di fare qualsiasi cosa, dalla cura del cancro alla costruzione di robot umanoidi. Pedro Domingos ci racconta il futuro meraviglioso ed eccitante che ci attende.» Walter Isaacson, autore di Steve Jobs e Gli innovatori «L’argomento è attualissimo e Pedro Domingos ha un vero talento nello spiegare anche i concetti più astratti.» The Economist La nostra società è immersa negli algoritmi. Ogni volta che visitiamo un sito web cercando un libro o un film, o che navighiamo tra i negozi online, lasciamo dietro di noi una lunga traccia digitale che descrive le nostre abitudini e le nostre preferenze; questa traccia è il «materiale grezzo», il database da cui algoritmi sempre più sofisticati traggono le informazioni per proporci il prodotto di cui abbiamo (o crediamo di avere) bisogno. Gli algoritmi ci osservano, ci imitano e fanno esperimenti su di noi, per raggiungere lo scopo che è considerato il Santo Graal della ricerca informatica: l’Algoritmo Definitivo in grado di estrarre tutte le informazioni dai dati e fare tutto, proprio tutto ciò che vogliamo, persino prima che lo chiediamo. Questo, dal punto di vista commerciale. Ma c’è anche un lato scientifico della questione, il machine learning, ovvero il campo di studi che si pone come scopo quello «niente meno» di automatizzare le scoperte. Si tratta in sostanza di trovare un algoritmo in grado di programmare se stesso. Sembra fantascienza, e invece è una disciplina nel pieno del suo fermento. Pedro Domingos è universalmente considerato uno degli scienziati di punta in questo settore. Sotto la sua guida scopriremo gli algoritmi che si nascondono dietro le nostre ricerche su Google, Amazon e Netflix. Con lui, scopriremo che esistono ben cinque scuole di pensiero differenti, che prendono ispirazione da campi tra loro distanti come le neuroscienze, l’evoluzione, la psicologia, la fisica e la statistica, tutti all’origine di strategie diverse per arrivare all’Algoritmo Definitivo. Passo dopo passo, Domingos mette al loro posto tutti i pezzi del puzzle fino a farci vedere questa intelligenza automatica universale, l’«algoritmo-fine-di-mondo», si potrebbe dire, discutendone il significato e l’impatto che potrà avere in futuro per la scienza, il mercato, la società e la vita di tutti e ciascuno di noi. La ricerca di questa macchina universale dell’apprendimento è uno degli sviluppi più affascinanti e rivoluzionari del pensiero umano di tutti i tempi e L’Algoritmo Definitivo di Pedro Domingos è la guida fondamentale per capirne a fondo il peso e le implicazioni.",
+    "cover": "http://books.google.com/books/content?id=JE3TCwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "The Innovator's Dilemma",
+    "author": "Clayton M. Christensen",
+    "description": "Named one of 100 Leadership & Success Books to Read in a Lifetime by Amazon Editors A Wall Street Journal and Businessweek bestseller. Named by Fast Company as one of the most influential leadership books in its Leadership Hall of Fame. An innovation classic. From Steve Jobs to Jeff Bezos, Clay Christensen’s work continues to underpin today’s most innovative leaders and organizations. The bestselling classic on disruptive innovation, by renowned author Clayton M. Christensen. His work is cited by the world’s best-known thought leaders, from Steve Jobs to Malcolm Gladwell. In this classic bestseller—one of the most influential business books of all time—innovation expert Clayton Christensen shows how even the most outstanding companies can do everything right—yet still lose market leadership. Christensen explains why most companies miss out on new waves of innovation. No matter the industry, he says, a successful company with established products will get pushed aside unless managers know how and when to abandon traditional business practices. Offering both successes and failures from leading companies as a guide, The Innovator’s Dilemma gives you a set of rules for capitalizing on the phenomenon of disruptive innovation. Sharp, cogent, and provocative—and consistently noted as one of the most valuable business ideas of all time—The Innovator’s Dilemma is the book no manager, leader, or entrepreneur should be without.",
+    "cover": "http://books.google.com/books/content?id=lURBCgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "english"
+  },
+  {
+    "title": "Il tradimento dei numeri. I dark data e l'arte di nascondere la verità",
+    "author": "David J. Hand",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=krjKygEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "La compagnia degli enigmisti",
+    "author": "Samuel Burr",
+    "description": "«\"Clayton Stumper ha 24 anni, si veste come un vecchio gentleman e il suo migliore amico è un signore ultraottantenne. Ecco a voi un giovane «invecchiato prima di diventare grande», nato dalla penna dell'esordiente inglese Samuel Burr, per il suo libro La compagnia degli enigmisti, un giallo anomalo che mescola misteri e sentimenti.\"» F - Liana Messina «\"Una caccia al tesoro lunga un romanzo, fondata su soluzioni che altro non sono che \"fondamenta per una vita appagante\". [...] Una storia che porta il lettore a giocare insieme con i protagonisti, in una narrazione che alterna il passato al presente.\" » La Lettura (Corriere della sera) - Jessica Chia «\"Una caccia al tesoro che svela il passato, e apre al futuro. Puzzle, cruciverba e una storia che cattura.» Sette (Corriere della sera) - Giulia Ziino Un ragazzo abbandonato alla nascita e cresciuto da un gruppo di menti brillanti. Un ultimo, impossibile rompicapo da risolvere. Un segreto che cambierà tutto. In una magione del Bedfordshire che ha visto giorni migliori, di proprietà della celebre enigmista Philippa Allsbrook, un eccentrico gruppo composto da sciaradisti e sciaradiste, creatori e creatrici di rebus e labirinti, enigmisti ed enigmiste per lo più ottuagenari trascorre la propria esistenza ideando e risolvendo rompicapi. Le loro menti sono le più acute e affinate d’Inghilterra, eppure c’è un segreto che nemmeno i soci della Compagnia conoscono, un segreto che Philippa, sul letto di morte, affida a Clayton Stumper, il giovane uomo che lei stessa, un giorno di venticinque anni prima, ha trovato abbandonato in fasce fuori dalla porta della villa. Clay, allevato dai più brillanti geni del secolo scorso, si veste come un uomo d’altri tempi, beve sherry e non sa niente delle proprie origini. Ma, forse, il fitto mistero che ammanta il suo passato può trovare una soluzione grazie alla curiosa scatola che Philippa gli ha lasciato in eredità. Aiutato dalla bislacca quanto astuta Compagnia, Clayton (e con lui il lettore) cercherà di decifrare gli indizi contenuti nel cofanetto in un viaggio fra labirinti e rompicapi che, forse, lo porteranno a sciogliere l’enigma più difficile di tutti, quello che riguarda chi siamo veramente.",
+    "cover": "http://books.google.com/books/content?id=tasGEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Breve e universale storia degli algoritmi",
+    "author": "Luigi Laura",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=dDTwywEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Mindful Chess",
+    "author": "Paul van der Sterren",
+    "description": "The Dutch Grandmaster Paul van der Sterren was a professional chess player for over twenty years. At the peak of his career, he qualified for the Candidate Matches for the World Championship - and was only four victories away from the World Title. When, later in life, he discovered vipassana meditation, he approached mindfulness with the same total devotion as he had brought to chess. In Mindful Chess, you will follow his journey and get his long and short answer to whether meditation or mindfulness will help your chess.",
+    "cover": "http://books.google.com/books/content?id=m_EC0AEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "english"
+  },
+  {
+    "title": "The Anthropic Cosmological Principle",
+    "author": "John D. Barrow, Frank J. Tipler",
+    "description": "Investigates the history of philosophic thought concerning the question of design and mankind's place in the universe. The modern collection of ideas known as the \"anthropic cosmological principle\" asserts that there is a deep connection between intelligent life and the physical universe.",
+    "cover": "http://books.google.com/books/content?id=Agvg1qD7lUkC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "english"
+  },
+  {
+    "title": "Daemon (Versione italiana)",
+    "author": "Daniel Suarez",
+    "description": "Un thriller tecnologico che esplora le inimmaginabili e terribili conseguenze di un'evoluzione informatica sfuggita al controllo umano.",
+    "cover": "http://books.google.com/books/content?id=1PDcrwL5diMC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Snow Crash",
+    "author": "Neal Stephenson",
+    "description": "Now featuring never-before-seen material, the “brilliantly realized” (The New York Times Book Review) breakthrough novel from visionary author Neal Stephenson, a modern classic that predicted the metaverse and inspired generations of Silicon Valley innovators Hiro lives in a Los Angeles where franchises line the freeway as far as the eye can see. The only relief from the sea of logos is within the autonomous city-states, where law-abiding citizens don’t dare leave their mansions. Hiro delivers pizza to the mansions for a living, defending his pies from marauders when necessary with a matched set of samurai swords. His home is a shared 20 X 30 U-Stor-It. He spends most of his time goggled in to the Metaverse, where his avatar is legendary. But in the club known as The Black Sun, his fellow hackers are being felled by a weird new drug called Snow Crash that reduces them to nothing more than a jittering cloud of bad digital karma (and IRL, a vegetative state). Investigating the Infocalypse leads Hiro all the way back to the beginning of language itself, with roots in an ancient Sumerian priesthood. He’ll be joined by Y.T., a fearless teenaged skateboard courier. Together, they must race to stop a shadowy virtual villain hell-bent on world domination.",
+    "cover": "http://books.google.com/books/content?id=RMd3GpIFxcUC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+    "language": "italiano"
+  },
+  {
+    "title": "Mente locale",
+    "author": "Tom Stafford, Matt Webb",
+    "description": "Nessuna descrizione disponibile",
+    "cover": "http://books.google.com/books/content?id=kjDSnQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "language": "italiano"
+  }
+];
 
 
-        // Aggiungi questa funzione dopo la definizione dell'array 'books'
-            function populateBookGrid() {
+        function populateBookGrid() {
             const bookGrid = document.getElementById('bookGrid');
             bookGrid.innerHTML = ''; // Pulisce la griglia esistente
             books.forEach((book, index) => {
                 bookGrid.appendChild(createBookElement(book, index));
             });
         }
-        
-        // Chiama questa funzione quando la pagina è caricata
+
         window.addEventListener('load', populateBookGrid);
 
         function exportBookList() {
@@ -199,42 +448,44 @@
 
             // Chiama questa funzione quando la pagina è caricata
             window.addEventListener('load', populateBookGrid);`;
-    
+
             document.getElementById('exportModal').style.display = 'block';
         }
 
-// Event listener per il pulsante di esportazione
-document.getElementById('exportButton').addEventListener('click', exportBookList);
+        document.getElementById('exportButton').addEventListener('click', exportBookList);
 
-// Chiusura del modal di esportazione
-document.getElementById('exportModal').querySelector('.close').onclick = function() {
-    document.getElementById('exportModal').style.display = 'none';
-}        
+        document.getElementById('exportModal').querySelector('.close').onclick = function() {
+            document.getElementById('exportModal').style.display = 'none';
+        }        
+
         function createBookElement(book, index) {
             const bookElement = document.createElement('div');
             bookElement.classList.add('book-item');
+            const languageFlag = book.language === 'italiano' ? '🇮🇹' : '🇬🇧';
             bookElement.innerHTML = `
                 <img src="${book.cover}" alt="${book.title}" class="book-cover">
                 <div class="book-title">${book.title}</div>
                 <div class="book-author">${book.author}</div>
                 <div class="book-description">${book.description}</div>
+                <div class="book-language">Lingua: ${languageFlag} ${book.language}</div>
             `;
             bookElement.onclick = () => openModal(index);
             return bookElement;
         }
 
-        async function searchBook(title, author) {
+        async function searchBook(title, author, language) {
             const query = `intitle:${title}+inauthor:${author}`;
             const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`);
             const data = await response.json();
-        
+
             if (data.items && data.items.length > 0) {
                 const bookInfo = data.items[0].volumeInfo;
                 return {
                     title: bookInfo.title,
                     author: bookInfo.authors ? bookInfo.authors.join(', ') : 'Autore sconosciuto',
                     description: bookInfo.description || 'Nessuna descrizione disponibile',
-                    cover: bookInfo.imageLinks ? bookInfo.imageLinks.thumbnail : '/api/placeholder/150/200'
+                    cover: bookInfo.imageLinks ? bookInfo.imageLinks.thumbnail : '/api/placeholder/150/200',
+                    language: language
                 };
             }
             return null;
@@ -244,13 +495,15 @@ document.getElementById('exportModal').querySelector('.close').onclick = functio
             e.preventDefault();
             const title = document.getElementById('titleInput').value;
             const author = document.getElementById('authorInput').value;
+            const language = document.getElementById('languageInput').value;
             
-            const book = await searchBook(title, author);
+            const book = await searchBook(title, author, language);
             if (book) {
                 books.push(book);
                 populateBookGrid();
                 document.getElementById('titleInput').value = '';
                 document.getElementById('authorInput').value = '';
+                document.getElementById('languageInput').value = '';
             } else {
                 alert('Libro non trovato. Prova a cercare con termini diversi.');
             }
@@ -266,6 +519,8 @@ document.getElementById('exportModal').querySelector('.close').onclick = functio
             document.getElementById("modalAuthor").textContent = book.author;
             document.getElementById("modalCover").src = book.cover;
             document.getElementById("modalDescription").textContent = book.description;
+            const languageFlag = book.language === 'italiano' ? '🇮🇹' : '🇬🇧';
+            document.getElementById("modalLanguage").textContent = `Lingua: ${languageFlag} ${book.language}`;
             modal.style.display = "block";
         }
 
@@ -278,6 +533,30 @@ document.getElementById('exportModal').querySelector('.close').onclick = functio
                 modal.style.display = "none";
             }
         }
+
+        // Aggiungi questa funzione per gestire la combinazione di tasti
+        function handleHotkey(event) {
+            // Verifica se sono stati premuti Ctrl+Shift+F
+            if (event.ctrlKey && event.shiftKey && event.key === 'F') {
+                event.preventDefault(); // Previene il comportamento predefinito del browser
+                toggleExportButton();
+            }
+        }
+
+        // Funzione per mostrare/nascondere il bottone segreto
+        function toggleExportButton() {
+            const secretButton = document.getElementById('exportButton');
+            secretButton.style.display = secretButton.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Aggiungi l'event listener per la combinazione di tasti
+        document.addEventListener('keydown', handleHotkey);
+
+        // Assicurati che il bottone sia nascosto all'inizio
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('exportButton').style.display = 'none';
+        });
+
     </script>
 </body>
 </html>
